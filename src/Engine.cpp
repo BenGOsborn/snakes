@@ -25,12 +25,12 @@ Engine::~Engine()
     tcsetattr(STDIN_FILENO, TCSANOW, &base);
 }
 
-void Engine::clearScreen()
+void Engine::clearScreen() const
 {
     std::cout << CLEAR_SCREEN;
 }
 
-std::unique_ptr<int> Engine::pollKey()
+std::unique_ptr<int> Engine::pollKey() const
 {
     int ch = getchar();
     if (ch == EOF)

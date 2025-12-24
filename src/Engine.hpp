@@ -10,6 +10,6 @@ class Engine : public IEngine
 public:
     Engine(termios &terminal);
     ~Engine();
-    void clearScreen() override;
-    std::unique_ptr<int> pollKey() override;
+    void clearScreen() const override;
+    std::unique_ptr<int> pollKey() const override;
 };
