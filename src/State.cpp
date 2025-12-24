@@ -22,13 +22,13 @@ Position State::buildFruit() const noexcept
     return Position{fruitX, fruitY};
 }
 
-Snake State::buildSnake() const
+Snake State::buildSnake() const noexcept
 {
     Position position{};
     Snake snake{
         Direction::Right,
-        {{0, 0}},
-        {{0, true}},
+        {position},
+        {position},
     };
     return snake;
 }
@@ -55,7 +55,7 @@ void State::updateDirection(Direction direction) noexcept
     snake.direction = direction;
 }
 
-void State::run() noexcept
+void State::run()
 {
     if (!isRunning())
     {
@@ -91,13 +91,8 @@ void State::run() noexcept
 
 std::vector<std::vector<Tile>> State::getTiles() const noexcept
 {
-    std::vector<std::vector<Tile>> grid(height);
-    for (int i = 0; i < height; i++)
-    {
-        std::vector<Tile> row(width);
-    }
-    std::vector<Tile> row = grid.at(fruit.y);
-    row[fruit.x] = Tile::Fruit;
+    std::vector<std::vector<Tile>> grid(height, std::vector<Tile>(width, Tile::Empty));
+    grid[fruit.y][fruit.x] = Tile::Fruit;
     for (size_t i = 0; i < snake.position.size(); ++i)
     {
         Tile body = Tile::Snake;
@@ -106,8 +101,7 @@ std::vector<std::vector<Tile>> State::getTiles() const noexcept
             body = Tile::SnakeHead;
         }
         Position position = snake.position.at(i);
-        std::vector<Tile> row = grid.at(position.y);
-        row[position.x] = body;
+        grid[position.y][position.x] = body;
     }
     return grid;
 }

@@ -1,46 +1,57 @@
 #include <iostream>
 #include "Engine.hpp"
 #include "IEngine.hpp"
+#include "State.hpp"
+#include "IState.hpp"
 #include <chrono>
 #include <memory>
+#include <vector>
 #include <thread>
 #include <termios.h>
+#include <iomanip>
 
-void startLoop(const IEngine *engine)
+// Need to limit to the size of your terminal (including the additional characters used in the printer)
+const int GRID_SIZE = 25;
+
+void printScreen(IState *state)
 {
-    int x = 10;
-    int y = 10;
-    bool running = true;
+    std::vector<std::vector<Tile>> grid = state->getTiles();
+    for (const std::vector<Tile> &row : grid)
+    {
+        for (const Tile &elem : row)
+        {
+            std::cout << std::setw(1) << static_cast<char>(elem);
+        }
+        std::cout << '\n';
+    }
+    std::cout << std::flush;
+}
 
-    while (running)
+void startLoop(const IEngine *engine, IState *state)
+{
+    while (state->isRunning())
     {
         engine->clearScreen();
 
-        // draw player
-        for (int i = 0; i < y; i++)
-            std::cout << "\n";
-        for (int i = 0; i < x; i++)
-            std::cout << " ";
-        std::cout << "@\n";
-
-        // handle input
         std::unique_ptr<int> keyPtr = engine->pollKey();
         if (keyPtr != nullptr)
         {
             int key = *keyPtr;
             if (key == 'a')
-                x--; // move left
+                state->updateDirection(Direction::Left);
             if (key == 'd')
-                x++; // move right
+                state->updateDirection(Direction::Right);
             if (key == 'w')
-                y--; // move left
+                state->updateDirection(Direction::Up);
             if (key == 's')
-                y++; // move right
-            if (key == 'q')
-                running = false;
+                state->updateDirection(Direction::Down);
         }
 
-        std::this_thread::sleep_for(std::chrono::milliseconds(50)); // ~20 FPS
+        state->run();
+
+        printScreen(state);
+
+        std::this_thread::sleep_for(std::chrono::milliseconds(200)); // ~20 FPS
     }
 }
 
@@ -48,8 +59,9 @@ int main()
 {
     termios terminal{};
     std::unique_ptr<IEngine> engine = std::make_unique<Engine>(terminal);
+    std::unique_ptr<IState> state = std::make_unique<State>(GRID_SIZE, GRID_SIZE);
 
-    startLoop(engine.get());
+    startLoop(engine.get(), state.get());
 
     return 0;
 }

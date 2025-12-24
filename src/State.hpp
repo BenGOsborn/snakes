@@ -52,7 +52,7 @@ public:
     State(int width, int height);
     ~State() override = default;
     void updateDirection(Direction direction) noexcept override;
-    void run() noexcept override;
+    void run() override;
     std::vector<std::vector<Tile>> getTiles() const noexcept override;
     bool isRunning() const noexcept override;
 };
