@@ -1,25 +1,47 @@
 #pragma once
 #include "IState.hpp"
 #include <vector>
+#include <set>
 
 struct Position
 {
     int x;
     int y;
+
+    bool operator<(const Position &other) const
+    {
+        return std::tie(x, y) < std::tie(other.x, other.y);
+    }
+
+    bool operator==(const Position &other) const
+    {
+        return x == other.x && y == other.y;
+    }
+};
+
+struct Snake
+{
+    Direction direction;
+    std::vector<Position> position;
+    std::set<Position> index;
 };
 
 class State : public IState
 {
-    std::vector<Position> snake;
-    int maxFruit;
     int width;
     int height;
+    bool running;
+    Snake snake;
+    Position fruit;
+
+    Snake buildSnake() const noexcept;
+    Position buildFruit() const noexcept;
 
 public:
-    State(int maxFruit, int width, int height);
-    ~State();
+    State(int width, int height);
+    ~State() override = default;
     void updateDirection(Direction direction) noexcept override;
-    void run() override;
-    std::vector<std::vector<int>> getOutput() const noexcept override;
+    void run() noexcept override;
+    std::vector<std::vector<Tile>> getTiles() const noexcept override;
     bool isRunning() const noexcept override;
 };
