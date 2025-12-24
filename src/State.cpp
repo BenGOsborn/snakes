@@ -33,12 +33,61 @@ Snake State::buildSnake() const
     return snake;
 }
 
+Position State::buildPosition(Position other, Direction direction) const
+{
+    switch (direction)
+    {
+    case Direction::Up:
+        return other + Position{0, -1};
+    case Direction::Down:
+        return other + Position{0, 1};
+    case Direction::Left:
+        return other + Position{-1, 0};
+    case Direction::Right:
+        return other + Position{1, 0};
+    default:
+        throw std::runtime_error("undefined direction");
+    }
+}
+
 void State::updateDirection(Direction direction) noexcept
 {
     snake.direction = direction;
 }
 
-void State::run() noexcept {}
+void State::run() noexcept
+{
+    if (!isRunning())
+    {
+        throw std::runtime_error("not running anymore");
+    }
+    Position head = snake.position.at(0);
+    if (head != fruit)
+    {
+        Position tail = snake.position.at(snake.position.size() - 1);
+        snake.position.pop_back();
+        snake.index.erase(tail);
+    }
+    else
+    {
+        fruit = buildFruit();
+    }
+    Position newHead = buildPosition(head, snake.direction);
+    // The new head is out of bounds
+    if (newHead.x < 0 || newHead.x >= width || newHead.y < 0 || newHead.y >= height)
+    {
+        running = false;
+        return;
+    }
+    // The new head overlaps with the snake
+    if (snake.index.find(newHead) != snake.index.end())
+    {
+        running = false;
+        return;
+    }
+    snake.position.insert(snake.position.begin(), newHead);
+    snake.index.insert(newHead);
+}
 
 std::vector<std::vector<Tile>> State::getTiles() const noexcept
 {

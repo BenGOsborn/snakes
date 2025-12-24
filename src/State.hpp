@@ -17,6 +17,16 @@ struct Position
     {
         return x == other.x && y == other.y;
     }
+
+    bool operator!=(const Position &other) const
+    {
+        return x != other.x || y != other.y;
+    }
+
+    Position operator+(const Position &other) const
+    {
+        return Position{x + other.x, y + other.y};
+    }
 };
 
 struct Snake
@@ -36,6 +46,7 @@ class State : public IState
 
     Snake buildSnake() const noexcept;
     Position buildFruit() const noexcept;
+    Position buildPosition(Position other, Direction direction) const;
 
 public:
     State(int width, int height);
